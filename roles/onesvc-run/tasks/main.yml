@@ -1,0 +1,31 @@
+---
+
+
+
+- name: gather project name
+  shell: onegate service show --json | jq -r ".SERVICE.name"
+  register: onegate_info
+
+- name: store project name
+  set_fact:
+     one_svcname: "{{ onegate_info.stdout.split('-')[2] }}"
+  #failed_when: onegate_info.split('-')[0]|lower  != "svc"
+
+ 
+# we just use get_url for now, but later we'll 
+# certainly want the whole repo with tests etc.
+#- git:
+#  repo: https://gitlab.dmz.deepthink.ag/onesvc/hallowelt.git
+#  dest: /usr/share/onesvc
+#  bare: yes
+
+- name: fetch runner script
+  get_url: 
+    url: https://gitlab.dmz.deepthink.ag/onesvc/{{ one_svcname }}/raw/master/bin/run.sh
+    mode: 0700
+    dest: /usr/bin/run.sh
+    force: yes
+
+
+- name: run runner
+  command:  /usr/bin/run.sh

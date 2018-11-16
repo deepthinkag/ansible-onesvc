@@ -1,0 +1,45 @@
+---
+
+
+- name: Ensure /usr/local/bin exists
+  file: 
+    path: /usr/local/bin 
+    state: directory
+    mode: 0755
+
+- name: Ensure JQ is installed
+  apt:
+    name: jq
+    state: present
+  when: ansible_pkg_mgr == "apt"
+  environment: "{{proxy_env}}"
+
+
+- name: Ensure JQ is installed
+  yum:
+     name: jq
+     state: present
+  when: ansible_pkg_mgr == "yum"
+  environment: "{{proxy_env}}"
+
+
+
+- name: Ensure JQ is installed
+  zypper:
+     name: jq
+     state: present
+  when: ansible_pkg_mgr == "zypper"
+  environment: "{{proxy_env}}"
+
+# FreeBSD und Alpine sind noch egal
+
+
+- name: ONEgate Rudder connector
+  copy: 
+    src: onegate-rudder.sh
+    dest: /usr/local/bin/onegate-rudder.sh
+    mode: 0700
+
+
+- name: store ONEgate info to Rudder
+  command: /usr/local/bin/onegate-rudder.sh 

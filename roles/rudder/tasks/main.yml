@@ -1,0 +1,131 @@
+---
+
+
+      - name: rudder agent repo key
+        apt_key:
+          keyserver: keyserver.ubuntu.com
+          id: 474A19E8
+        when: ansible_pkg_mgr == "apt"
+
+      - name: rudder repo
+        apt_repository:
+          repo: deb http://repository.rudder.io/apt/latest {{ ansible_distribution_release }} main
+          state: present
+        when: ansible_pkg_mgr == "apt" and ansible_distribution_release != "NA"
+
+        
+      - name: rudder agent install
+        apt:
+            name: rudder-agent
+            state: present
+        when: ansible_pkg_mgr == "apt"
+        environment: "{{proxy_env}}"
+
+
+
+      - name: rudder repo key
+        rpm_key:
+            state: present
+            key: https://repository.rudder.io/rpm/rudder_rpm_key.pub
+        when: ansible_pkg_mgr == "yum"
+
+      - name: rudder agent repo
+        yum_repository:
+            name: rudder-Rudder
+            description: Rudder latest repository
+            baseurl: https://repository.rudder.io/rpm/latest/RHEL_$releasever
+            gpgcheck: yes
+        when: ansible_pkg_mgr == "yum"
+
+
+      - name: rudder agent install
+        yum:
+            name: rudder-agent
+            state: present
+        when: ansible_pkg_mgr == "yum"
+        environment: "{{proxy_env}}"
+
+
+      # warning, sles12 hardcoded
+      - name: rudder agent repo
+        zypper_repository:
+             repo: https://repository.rudder.io/rpm/latest/SLES_12/
+             name: rudder-Rudder
+             description: Rudder latest repository
+             state: present
+             runrefresh: yes
+             auto_import_keys: yes
+        when: ansible_pkg_mgr == "zypper"
+        environment: "{{proxy_env}}"
+
+      - name: rsyslog install
+        zypper:
+            name: rsyslog
+            state: present
+        when: ansible_pkg_mgr == "zypper"
+        environment: "{{proxy_env}}"
+
+      - name: rudder agent install
+        zypper:
+            name: rudder-agent
+            state: present
+        when: ansible_pkg_mgr == "zypper"
+        environment: "{{proxy_env}}"
+
+      - name: Rudder master config
+        tags: setup
+        template:
+          src: policy_server.dat.j2
+          dest: /var/rudder/cfengine-community/policy_server.dat
+          owner: root
+          mode: 0600
+
+      - name: Rudder agent reinit 
+        tags: setup
+        shell: echo "" | rudder agent reinit
+
+      - name: Rudder agent key
+        file:
+          name: "{{ item }}"
+          state: absent
+        with_items:
+          - /var/cfengine/ppkeys/localhost.priv
+          - /var/cfengine/ppkeys/localhost.pub
+          - /var/rudder/cfengine-community/ppkeys/localhost.priv
+          - /var/rudder/cfengine-community/ppkeys/localhost.pub
+        when: ansible_pkg_mgr == "pkgng"
+
+
+      - name: regen Rudder agent key
+        command: cf-key
+        when: ansible_pkg_mgr == "pkgng"
+
+
+      - name: Rudder agent key
+        copy:
+          src: /var/cfengine/ppkeys/{{ item }}
+          dest: /var/rudder/cfengine-community/ppkeys/{{ item }}
+          remote_src: yes
+        with_items:
+          - localhost.pub
+          - localhost.priv
+        when: ansible_pkg_mgr == "pkgng"
+
+      - name: Rudder ppkeys fix
+        tags: setup
+        command: ssh-keygen -t rsa -b 4096 -N "" -f /var/rudder/cfengine-community/ppkeys/localhost
+        when: ansible_pkg_mgr == "pkgng"
+
+      - name: Rudder agent enable 
+        tags: setup
+        command: rudder agent enable
+
+#      - name: Rudder agent hostname changes
+        
+      - name: Rudder agent inventory 
+        tags: setup
+        command: rudder agent inventory
+        
+#     - name: Rudder agent registration 
+        # delegate???
+       

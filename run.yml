@@ -1,0 +1,16 @@
+---
+
+
+- hosts: ci
+  remote_user: root
+  vars:
+    proxy_env:
+      http_proxy: http://{{ lab_proxy }}:3128
+      https_proxy: http://{{ lab_proxy }}:3128
+    rudder_master: {{ rudder_master }}
+ 
+  roles: 
+    - role: onegate
+      when: ansible_pkg_mgr == "apt" or ansible_pkg_mgr == "yum" or ansible_pkg_mgr == "zypper"
+    - role: onesvc-run
+      when: ansible_pkg_mgr == "apt" or ansible_pkg_mgr == "yum" or ansible_pkg_mgr == "zypper"

@@ -1,0 +1,111 @@
+---
+
+
+
+      - name: Update and upgrade apt packages
+        become: true
+        apt:
+          upgrade: yes
+          update_cache: yes
+          cache_valid_time: 86400
+        when: ansible_pkg_mgr == "apt"
+        environment: "{{proxy_env}}"
+
+      - name: Install test package
+        apt:
+            name: tcpdump
+            state: present
+        when: ansible_pkg_mgr == "apt"
+        environment: "{{proxy_env}}"
+
+      - name: Update and upgrade rpm packages
+        become: true
+        yum:
+           state: latest
+           name: "*"
+           update_cache: yes
+        when: ansible_pkg_mgr == "yum"
+        environment: "{{proxy_env}}"
+
+      - name: Install selinux bindings
+        yum:
+            name: libselinux-python
+            state: present
+        when: ansible_pkg_mgr == "yum"
+        environment: "{{proxy_env}}"
+
+      - name: Install test package
+        yum:
+            name: tcpdump
+            state: present
+        when: ansible_pkg_mgr == "yum"
+        environment: "{{proxy_env}}"
+
+
+
+      - name: Ansible dependencies
+        zypper:
+            name: ['libssl43', 'python-urllib3', 'python-xml']
+            state: present
+        when: ansible_pkg_mgr == "zypper"
+        environment: "{{proxy_env}}"
+
+
+      - name: Update and upgrade rpm packages
+        become: true
+        zypper:
+           state: latest
+           name: "*"
+           update_cache: yes
+        when: ansible_pkg_mgr == "zypper"
+        environment: "{{proxy_env}}"
+
+      - name: Install test package
+        zypper:
+            name: tcpdump
+            state: present
+        when: ansible_pkg_mgr == "zypper"
+        environment: "{{proxy_env}}"
+
+
+
+      - name: Update and upgrade apk packages
+        become: true
+        apk:
+           state: latest
+           update_cache: yes
+           upgrade: yes
+        when: ansible_pkg_mgr == "apk"
+        environment: "{{proxy_env}}"
+
+      - name: Install test package
+        apk:
+            name: tcpdump
+            state: present
+        when: ansible_pkg_mgr == "apk"
+        environment: "{{proxy_env}}"
+
+        #      - name: Update and upgrade pkg packages
+        #become: true
+        #pkgng:
+        #when: ansible_pkg_mgr == "pkgng"
+
+      - name: Update pkg
+        command: pkg-static update
+        when: ansible_pkg_mgr == "pkgng"
+
+      - name: Upgrade pkg
+        command: pkg-static upgrade pkg
+        when: ansible_pkg_mgr == "pkgng"
+        
+      - name: Update and upgrade pkg packagesj
+        command: pkg upgrade -y
+        when: ansible_pkg_mgr == "pkgng"
+
+      - name: Install test package
+        pkgng:
+            name: tcpdump
+            state: present
+        when: ansible_pkg_mgr == "pkgng"
+        environment: "{{proxy_env}}"
+

@@ -1,0 +1,24 @@
+---
+
+      - name: base image reset Rudder policies
+        tags: wipe
+        command: rudder agent reset
+        ignore_errors: true
+        tags:
+          - skip_ansible_lint
+
+      - name: base image reset Rudder settings
+        tags: wipe
+        file:
+            name: "{{ item }}"
+            state: absent
+        with_items:
+          - /opt/rudder/etc/uuid.hive
+          - /var/rudder/cfengine-community/policy_server.dat
+          - /var/rudder/cfengine-community/ppkeys/*
+          - /var/rudder/cfengine-community/state/*
+          - /var/rudder/inventories/*
+        ignore_errors: yes
+
+
+      # delete from rudder

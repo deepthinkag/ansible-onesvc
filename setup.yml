@@ -1,0 +1,20 @@
+---
+
+
+- hosts: ci
+  remote_user: root
+  vars: 
+    proxy_env:
+      http_proxy:    http://{{ lab_proxy }}:3128
+      https_proxy:   http://{{ lab_proxy }}:3128
+      rudder_master: "{{ rudder_master }}"
+ 
+  
+
+  roles:
+    - role: updates
+    - role: onegate
+      # Alpine and FreeBSD have no onegate command
+      when: ansible_pkg_mgr != "apk" and ansible_pkg_mgr != "pkgng"
+    - role: rudder
+      when: ansible_pkg_mgr != "apk"

@@ -1,0 +1,12 @@
+---
+
+
+- hosts: ci
+  remote_user: root
+
+
+  roles:
+    - role: wipecfg
+      when: ansible_pkg_mgr != "apk"
+    - role: wiperuddercfg
+      when: ansible_pkg_mgr != "apk"

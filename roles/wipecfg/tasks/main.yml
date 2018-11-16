@@ -1,0 +1,13 @@
+---
+
+
+  - name: clean up base image
+    tags: wipe
+    file:
+      name: "{{ item }}"
+      state: absent
+    with_items:
+          - /etc/ssh/ssh_host_*key*
+          - /root/.history
+          - /root/.bash_history
+    ignore_errors: yes

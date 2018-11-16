@@ -1,0 +1,4 @@
+*.retry
+hosts
+config.js
+group_vars/*

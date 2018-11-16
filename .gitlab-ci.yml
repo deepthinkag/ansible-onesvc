@@ -1,0 +1,33 @@
+---
+# -*- coding: utf-8 -*-
+# via: https://www.krenger.ch/blog/gitlab-ci-yml-for-ansible-lint/
+# TODO: add secondary ruleset: 
+# https://github.com/tsukinowasha/ansible-lint-rule
+
+image: debian:latest
+
+before_script:
+  - apt-get update -qy
+  - apt-get install -y git python-dev python-pip
+  - git submodule update --init
+  - pip install --upgrade ansible ansible-lint
+  - ansible --version
+  - ansible-lint --version
+
+stages:
+  - ansible-lint
+  - ansible-syntax-check
+
+ansible-lint:
+  stage: ansible-lint
+  script:
+    - ansible-lint wipe.yml
+    - ansible-lint setup.yml
+    - ansible-lint run.yml
+
+ansible-syntax-check:
+  stage: ansible-syntax-check
+  script:
+    - ansible-playbook --inventory inventory --syntax-check wipe.yml
+    - ansible-playbook --inventory inventory --syntax-check setup.yml
+    - ansible-playbook --inventory inventory --syntax-check run.yml
